@@ -182,6 +182,10 @@ wxSize UNDEFINED_FRAME_SIZE = wxSize(0, 0);
 # include "cam_indi.h"
 #endif
 
+#if defined (V4L2_CAMERA)
+# include "cam_v4l2.h"
+#endif
+
 #if defined(SBIGROTATOR_CAMERA)
 # include "cam_sbigrotator.h"
 #endif
@@ -345,6 +349,9 @@ wxArrayString GuideCamera::GuideCameraList()
 #endif
 #if defined (WDM_CAMERA)
     CameraList.Add(_T("Windows WDM-style webcam camera"));
+#endif
+#if defined (V4L2_CAMERA)
+    CameraList.Add(_T("V4L2 Camera"));
 #endif
 #if defined (VFW_CAMERA)
     CameraList.Add(_T("Windows VFW-style webcam camera (older & SAC8)"));
@@ -518,6 +525,10 @@ GuideCamera *GuideCamera::Factory(const wxString& choice)
 #if defined (VFW_CAMERA)
         else if (choice.Contains(_T("Windows VFW")))
             pReturn = new CameraVFW();
+#endif
+#if defined (V4L2_CAMERA)
+        else if (choice.Contains(_T("V4L2 Camera")))
+            pReturn = new CameraV4L2();
 #endif
 #if defined (LE_SERIAL_CAMERA)
         else if (choice.Contains(_T("Long exposure Serial webcam")))

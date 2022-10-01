@@ -124,6 +124,7 @@
 #  define QHY_CAMERA
 # endif
 # define INDI_CAMERA
+# define V4L2_CAMERA
 # ifdef HAVE_ZWO_CAMERA
 #  define ZWO_ASI
 # endif

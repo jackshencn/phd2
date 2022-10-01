@@ -232,6 +232,8 @@ set(cam_SRC
   ${phd_src_dir}/cam_wdm.h
   ${phd_src_dir}/cam_zwo.cpp
   ${phd_src_dir}/cam_zwo.h
+  ${phd_src_dir}/cam_v4l2.cpp
+  ${phd_src_dir}/cam_v4l2.h
 
   ${phd_src_dir}/camera.cpp
   ${phd_src_dir}/camera.h
