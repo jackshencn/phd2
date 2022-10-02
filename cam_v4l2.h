@@ -39,11 +39,31 @@
 
 #include <stdio.h>
 
+#define IMG_WIDTH 648
+#define IMG_HEIGHT 480
+
+#define CLEAR(x) memset(&(x), 0, sizeof(x))
+
+typedef struct {
+    void   *start;
+    size_t  length;
+} membuf_t;
+
 class CameraV4L2 : public GuideCamera
 {
-    FILE * v4l2_adj;
-    FILE * v4l2_pipe;
-    long long prev_time;
+    long long total_time = 0;
+    long total_frame = 0;
+
+    membuf_t membuf[3];
+    int fd = -1;
+    const char dev_name[12] = "/dev/video5";
+    bool streamming = false;
+private:
+    int open_device(void);
+    int init_device(void);
+    int xioctl(int fh, int request, void *arg);
+    int start_capturing(void);
+    int init_mmap(void);
 
 public:
     CameraV4L2();
