@@ -52,7 +52,7 @@ int CameraV4L2::init_mmap(void) {
 
     CLEAR(req);
 
-    req.count = 3;
+    req.count = MEMBUF_COUNT;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
     req.memory = V4L2_MEMORY_MMAP;
 
@@ -66,7 +66,7 @@ int CameraV4L2::init_mmap(void) {
         return 1;
     }
 
-    if (req.count < 2) {
+    if (req.count != MEMBUF_COUNT) {
         fprintf(stderr, "Insufficient buffer memory on %s\\n",
              dev_name);
         return 1;
@@ -105,8 +105,6 @@ int CameraV4L2::init_mmap(void) {
                 return 1;
             }
         }
-        if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
-            fprintf(stderr, "VIDIOC_QBUF\n");
     }
 
     return 0;
@@ -251,6 +249,7 @@ bool CameraV4L2::Capture(int duration, usImage& img, int options, const wxRect& 
         pFrame->Alert(_("Memory allocation error"));
         throw ERROR_INFO("img.Init failed");
     }
+    long long prev_time = getmillisec();
 
     struct v4l2_control v4l2_ctl;
     v4l2_ctl.id = V4L2_CID_VBLANK;
@@ -273,9 +272,15 @@ bool CameraV4L2::Capture(int duration, usImage& img, int options, const wxRect& 
     buf.memory = V4L2_MEMORY_MMAP;
     buf.m.planes = planes;
     buf.length = 1;
+    buf.index = 0;
 
     if (!streamming) {
         start_capturing();
+    }
+
+    if (-1 == xioctl(fd, VIDIOC_QBUF, &buf)) {
+        printf("VIDIOC_QBUF error\n");
+        return true;
     }
 
     fd_set fds;
@@ -303,24 +308,18 @@ bool CameraV4L2::Capture(int duration, usImage& img, int options, const wxRect& 
             return true;
         }
     }
-    long long prev_time = getmillisec();
+    long long cur_time = getmillisec();
 
     uint16_t * buf_data = (uint16_t *) membuf[buf.index].start;
     for (int i = 0; i < img.NPixels; i++) {
         // Capture only Y channel
         img.ImageData[i] = *buf_data++ & 0xFF;
     }
-    long long cur_time = getmillisec();
     total_time += (cur_time - prev_time);
     total_frame++;
-    printf("Process %ums ave %f\n", (uint16_t) (cur_time - prev_time),
+    printf("Capture delay %ums ave %f\n", (uint16_t) (cur_time - prev_time),
         (float)total_time / total_frame);
     prev_time = cur_time;
-
-    if (-1 == xioctl(fd, VIDIOC_QBUF, &buf)) {
-        printf("VIDIOC_QBUF error\n");
-        return true;
-    }
 
     return false;
 }

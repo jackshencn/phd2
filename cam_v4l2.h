@@ -42,6 +42,8 @@
 #define IMG_WIDTH 648
 #define IMG_HEIGHT 480
 
+#define MEMBUF_COUNT 1
+
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 typedef struct {
@@ -54,7 +56,7 @@ class CameraV4L2 : public GuideCamera
     long long total_time = 0;
     long total_frame = 0;
 
-    membuf_t membuf[3];
+    membuf_t membuf[MEMBUF_COUNT];
     int fd = -1;
     const char dev_name[12] = "/dev/video5";
     bool streamming = false;
